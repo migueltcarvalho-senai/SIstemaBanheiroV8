@@ -1,104 +1,19 @@
 {
-    "registros_saida": [
-        {
-            "Field": "id",
-            "Type": "int(11)",
-            "Null": "NO",
-            "Key": "PRI",
-            "Default": null,
-            "Extra": "auto_increment"
-        },
-        {
-            "Field": "id_alunos",
-            "Type": "int(11)",
-            "Null": "YES",
-            "Key": "MUL",
-            "Default": null,
-            "Extra": ""
-        },
-        {
-            "Field": "hora_saida",
-            "Type": "datetime",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        },
-        {
-            "Field": "hora_retorno",
-            "Type": "datetime",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        },
-        {
-            "Field": "duracao_minutos",
-            "Type": "int(11)",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        },
-        {
-            "Field": "status_alunos",
-            "Type": "enum('EM_ANDAMENTO','CONCLUIDO')",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        }
-    ],
-    "fila_banheiro": [
-        {
-            "Field": "id",
-            "Type": "int(11)",
-            "Null": "NO",
-            "Key": "PRI",
-            "Default": null,
-            "Extra": "auto_increment"
-        },
-        {
-            "Field": "id_aluno",
-            "Type": "int(11)",
-            "Null": "YES",
-            "Key": "MUL",
-            "Default": null,
-            "Extra": ""
-        },
-        {
-            "Field": "ordem_fila",
-            "Type": "int(11)",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        },
-        {
-            "Field": "hora_registro_fila",
-            "Type": "datetime",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        }
-    ],
-    "alunos": [
-        {
-            "Field": "id",
-            "Type": "int(11)",
-            "Null": "NO",
-            "Key": "PRI",
-            "Default": null,
-            "Extra": "auto_increment"
-        },
-        {
-            "Field": "nome",
-            "Type": "varchar(255)",
-            "Null": "YES",
-            "Key": "",
-            "Default": null,
-            "Extra": ""
-        }
-    ]
+  "database": "sistema_banheiro",
+  "tables": {
+    "alunos": {
+      "columns": ["id_alunos", "nome"],
+      "primaryKey": "id_alunos"
+    },
+    "registros_saida": {
+      "columns": ["id_registro", "id_alunos", "hora_saida", "hora_retorno", "tempo_gasto", "status_alunos"],
+      "primaryKey": "id_registro",
+      "foreignKeys": [{"column": "id_alunos", "references": "alunos(id_alunos)"}]
+    },
+    "fila_banheiro": {
+      "columns": ["id_fila", "id_alunos", "hora_entrada_fila"],
+      "primaryKey": "id_fila",
+      "foreignKeys": [{"column": "id_alunos", "references": "alunos(id_alunos)"}]
+    }
+  }
 }

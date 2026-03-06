@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico - Controle de Banheiro</title>
+    <link rel="stylesheet" href="css/style.css?v=2.1">
+    <style>
+        .calendario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendario-header button {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        .calendario-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .dia-semana {
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-secondary);
+            padding: 10px 0;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .dia {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: center;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .dia:hover:not(.vazio) {
+            background: #f8fafc;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            border-color: var(--btn-start);
+        }
+        .dia.vazio {
+            background: transparent;
+            border: none;
+            cursor: default;
+            box-shadow: none;
+        }
+        .dia.hoje {
+            border: 2px solid var(--btn-start);
+            font-weight: 800;
+        }
+        .dia.selecionado {
+            background: var(--btn-start);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 150, 209, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Histórico de Acesso ao Banheiro</h1>
+            <nav>
+                <a href="index.html">Início</a>
+                <a href="dashboard.html">Estatísticas</a>
+                <a href="calendario.html">Histórico</a>
+            </nav>
+        </header>
+
+        <main style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card" style="align-self: start;">
+                <div class="calendario-header">
+                    <button id="btnAnterior">&lt; Anterior</button>
+                    <h2 id="mesAnoAtual" style="margin:0; border:none; padding:0;">Mês Ano</h2>
+                    <button id="btnProximo">Próximo &gt;</button>
+                </div>
+                
+                <div class="calendario-grid" id="calendarioGrid">
+                    <!-- Gerado via JavaScript -->
+                </div>
+            </div>
+
+            <div class="card" style="align-self: start;">
+                <h2>Registros de: <span id="dataSelecionadaLabel" style="color:var(--status-andamento);">Selecione um dia</span></h2>
+                <div id="resultadoArea" style="margin-top:20px;">
+                    <p>Clique em um dia no calendário para visualizar os registros.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/ui.js"></script>
+    <script src="js/calendario.js"></script>
+</body>
+</html>

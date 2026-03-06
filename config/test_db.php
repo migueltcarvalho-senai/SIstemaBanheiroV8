@@ -1,20 +1,34 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-define("DB_HOST", "localhost");
-define("DB_NAME", "sistema_banheiro");
-define("DB_USER", "root");
-define("DB_PASS", "");
-define("DB_PORT", "3307");
-
-echo "Tentando conectar em " . DB_HOST . ":" . DB_PORT . " no banco " . DB_NAME . "...\n";
+// Script de Diagnóstico de Conexão - test_db.php
+require_once 'database.php';
 
 try {
-    $conn = new PDO("mysql:host=". DB_HOST.";port=". DB_PORT .";dbname=". DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Sucesso: Conexao estabelecida!";
-} catch (PDOException $e) {
-    echo "Erro: " . $e->getMessage();
+    $db = Database::getInstance();
+    echo "<h1>Conexão com o Banco de Dados: SUCESSO!</h1>";
+    echo "<p>Configurações utilizadas:</p>";
+    echo "<ul>";
+    echo "<li>Host: " . DB_HOST . "</li>";
+    echo "<li>Porta: " . DB_PORT . "</li>";
+    echo "<li>Usuário: " . DB_USER . "</li>";
+    echo "<li>Banco: " . DB_NAME . "</li >";
+    echo "</ul>";
+
+    // Testar as tabelas
+    $stmt = $db->query("SHOW TABLES");
+    $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (count($tables) > 0) {
+        echo "<h2>Tabelas Encontradas:</h2><ul>";
+        foreach ($tables as $table) {
+            echo "<li>$table</li>";
+        }
+        echo "</ul>";
+    } else {
+        echo "<p style='color: red;'><strong>Aviso:</strong> Nenhuma tabela encontrada no banco de dados.</p>";
+    }
+
+} catch (Exception $e) {
+    echo "<h1>Falha na Conexão</h1>";
+    echo "<p style='color: red;'>" . $e->getMessage() . "</p>";
 }
 ?>

@@ -1,83 +1,72 @@
 <?php
-header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST, GET");
-header("Access-Control-Max-Age: 3600");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+require_once '../config/database.php';
+require_once '../models/Aluno.php';
+require_once '../models/Registro.php';
 
-// Inclui o DB que exporta a variável $conn conectada
-include_once '../config/database.php';
-include_once '../models/Aluno.php';
-include_once '../models/Registro.php';
+$db = Database::getInstance();
+$aluno = new Aluno($db);
+$registro = new Registro($db);
 
-// Injetando a conexão global $conn nos módulos (via construtor)
-$aluno = new Aluno($conn);
-$registro = new Registro($conn);
+$method = $_SERVER['REQUEST_METHOD'];
 
-// Pega os dados do POST
-$data = json_decode(file_get_contents("php://input"));
-
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if(!empty($data->id_aluno)) {
-        $id_aluno = $data->id_aluno;
-        
-        // Verifica se aluno existe
-        if($aluno->getAlunoById($id_aluno)) {
-            // Existe um ativo?
-            $ativo = $registro->getAtivo();
-
-            // Se existe alguém no banheiro
-            if($ativo) {
-                // É a mesma pessoa que está no banheiro retornando?
-                if($ativo['id_aluno'] == $id_aluno) {
-                    // Retorna do banheiro
-                    $registro->registrarRetorno($ativo['id']);
-                    
-                    // Alguem na fila? Coloca o próximo no status ativo
-                    $registro->proximoDaFila();
-
-                    echo json_encode(array("mensagem" => "Retorno registrado com sucesso.", "status" => "success"));
-                } else {
-                    // É outra pessoa querendo sair, coloca na fila
-                    // Verifica se já está na fila
-                    $fila = $registro->getFila();
-                    $jaNaFila = false;
-                    foreach($fila as $f) {
-                        if($f['id_aluno'] == $id_aluno) {
-                            $jaNaFila = true;
-                            break;
-                        }
-                    }
-                    
-                    if(!$jaNaFila) {
-                        $registro->entrarFila($id_aluno);
-                        echo json_encode(array("mensagem" => "Banheiro ocupado. Aluno adicionado à fila.", "status" => "success_fila"));
-                    } else {
-                        echo json_encode(array("mensagem" => "Aluno já está na fila.", "status" => "error"));
-                    }
-                }
-            } else {
-                // Ninguém no banheiro, pode ir
-                $registro->registrarSaida($id_aluno);
-                echo json_encode(array("mensagem" => "Saída registrada com sucesso.", "status" => "success"));
-            }
-        } else {
-            echo json_encode(array("mensagem" => "Aluno não encontrado.", "status" => "error"));
-        }
-    } else {
-        echo json_encode(array("mensagem" => "ID do aluno não informado.", "status" => "error"));
-    }
-} 
-// Requisição GET para buscar os dados atuais para a tela
-else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+if ($method === 'GET') {
+    // Retorna o status atual do painel principal (quem está fora, fila e registros limitados de hoje)
     $ativo = $registro->getAtivo();
-    $listaHoje = $registro->getRegistrosHoje();
     $fila = $registro->getFila();
+    $hoje = $registro->getRegistrosHoje();
+    
+    echo json_encode([
+        "status" => "success", 
+        "ativo" => $ativo, 
+        "fila" => $fila, 
+        "registros" => $hoje
+    ]);
 
-    echo json_encode(array(
-        "ativo" => $ativo,
-        "registros_hoje" => $listaHoje,
-        "fila" => $fila
-    ));
+} elseif ($method === 'POST') {
+    $data = json_decode(file_get_contents("php://input"));
+    
+    if (!isset($data->id_alunos) || empty($data->id_alunos)) {
+        echo json_encode(["status" => "error", "message" => "ID do aluno não informado."]);
+        exit;
+    }
+    
+    $id_alunos = $data->id_alunos;
+    
+    // 1. Verifica se o aluno existe
+    $dadosAluno = $aluno->getAlunoById($id_alunos);
+    if (!$dadosAluno) {
+        echo json_encode(["status" => "error", "message" => "Aluno não encontrado no banco."]);
+        exit;
+    }
+    
+    $ativo = $registro->getAtivo();
+    
+    // 2. Se o ID digitado for o mesmo do aluno que já está no banheiro (voltou)
+    if ($ativo && $ativo['id_alunos'] == $id_alunos) {
+        if ($registro->registrarRetorno($id_alunos)) {
+            echo json_encode(["status" => "success", "message" => "Retorno registrado com sucesso. Próximo da fila (se houver) foi chamado."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Erro ao registrar o retorno."]);
+        }
+        exit;
+    }
+    
+    // 3. Se o banheiro estiver ocupado (alguém diferente), entra na fila
+    if ($ativo) {
+        if ($registro->entrarFila($id_alunos)) {
+            echo json_encode(["status" => "success", "message" => "Banheiro Ocupado. Aluno adicionado à fila de espera."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Este aluno já está na fila de espera."]);
+        }
+        exit;
+    }
+    
+    // 4. Se o banheiro estiver livre, registra a saída imediatamente
+    if ($registro->registrarSaida($id_alunos)) {
+         echo json_encode(["status" => "success", "message" => "Saída registrada com sucesso."]);
+    } else {
+         echo json_encode(["status" => "error", "message" => "Erro desconhecido ao registrar saída."]);
+    }
 }
 ?>

@@ -6,12 +6,12 @@ require_once '../models/Registro.php';
 $db = Database::getInstance();
 $registro = new Registro($db);
 
-$estatisticas = $registro->getEstatisticasHoje();
-$ranking = $registro->getRankingHoje();
+$data = isset($_GET['data']) ? $_GET['data'] : date('Y-m-d');
+$registros = $registro->getRegistrosPorData($data);
 
 echo json_encode([
     "status" => "success",
-    "estatisticas" => $estatisticas,
-    "ranking" => $ranking
+    "data" => $data,
+    "registros" => $registros
 ]);
 ?>

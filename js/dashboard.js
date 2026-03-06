@@ -1,95 +1,73 @@
-const API_URL = 'api/dashboard.php';
+document.addEventListener("DOMContentLoaded", () => {
+    carregarDashboard();
+    setInterval(carregarDashboard, 15000); // Atualiza a cada 15 segundos
+});
 
-const statTotalSaidas = document.getElementById('statTotalSaidas');
-const statTotalAlunos = document.getElementById('statTotalAlunos');
-const statTempoMedio = document.getElementById('statTempoMedio');
-const statTempoTotal = document.getElementById('statTempoTotal');
-
-const tbodyAlunos = document.getElementById('tbodyAlunos');
-const listaRanking = document.getElementById('listaRanking');
-
-// Formata minutos em "X h Y m" ou "Y m"
-function formatarTempo(minutosTotais) {
-    if (!minutosTotais || minutosTotais == 0) return '0 m';
-    const minutos = Math.floor(minutosTotais);
-    if (minutos < 60) return `${minutos} m`;
-    const h = Math.floor(minutos / 60);
-    const m = minutos % 60;
-    return `${h} h ${m} m`;
-}
-
-function atualizarUI(dados) {
-    // 1. Estatísticas Gerais
-    if (dados.estatisticas) {
-        statTotalSaidas.textContent = dados.estatisticas.total_saidas || 0;
-        statTotalAlunos.textContent = dados.estatisticas.total_alunos_distintos || 0;
-        statTempoMedio.textContent = formatarTempo(dados.estatisticas.tempo_medio);
-        statTempoTotal.textContent = formatarTempo(dados.estatisticas.tempo_total);
-    }
-
-    // 2. Tabela de Alunos que Saíram
-    tbodyAlunos.innerHTML = '';
-    if (dados.alunos && dados.alunos.length > 0) {
-        dados.alunos.forEach(aluno => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${aluno.nome}</strong></td>
-                <td>${aluno.qtde_saidas}</td>
-                <td>${formatarTempo(aluno.tempo_total)}</td>
-            `;
-            tbodyAlunos.appendChild(tr);
-        });
-    } else {
-        tbodyAlunos.innerHTML = '<tr><td colspan="3" class="empty-state text-center">Nenhuma saída registrada hoje.</td></tr>';
-    }
-
-    // 3. Ranking de Demorados
-    listaRanking.innerHTML = '';
-    if (dados.ranking && dados.ranking.length > 0) {
-        dados.ranking.forEach((aluno, index) => {
-            const li = document.createElement('li');
-
-            // Cria um badge especial para o Top 3
-            let badgeClass = '';
-            if (index === 0) badgeClass = 'ranking-1';
-            else if (index === 1) badgeClass = 'ranking-2';
-            else if (index === 2) badgeClass = 'ranking-3';
-
-            li.innerHTML = `
-                <span>
-                    <span class="ranking-badge ${badgeClass}">${index + 1}</span>
-                    <strong>${aluno.nome}</strong>
-                </span>
-                <span style="color: var(--warning-text); font-weight: 600;">
-                    ${formatarTempo(aluno.tempo_total)}
-                </span>
-            `;
-            listaRanking.appendChild(li);
-        });
-    } else {
-        listaRanking.innerHTML = '<li class="empty-state text-center">Nenhum dado para o ranking.</li>';
-    }
+function formatTime(minutos) {
+    if (!minutos || isNaN(minutos)) return "0m";
+    const m = Math.round(minutos);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    const rest = m % 60;
+    return `${h}h ${rest}m`;
 }
 
 async function carregarDashboard() {
     try {
-        const res = await fetch(API_URL);
-        const textData = await res.text();
-        let dados;
-        try {
-            dados = JSON.parse(textData);
-        } catch (e) {
-            console.error("Erro ao fazer parse do JSON:", textData);
-            return;
+        const req = await fetch("api/dashboard.php");
+        const res = await req.json();
+
+        if (res.status === "success") {
+            // Popula KPIs
+            const est = res.estatisticas;
+            document.getElementById("totalSaidas").innerText = est.total_saidas || 0;
+            document.getElementById("totalAlunos").innerText = est.total_alunos_distintos || 0;
+            document.getElementById("tempoMedio").innerText = formatTime(est.tempo_medio);
+            document.getElementById("tempoTotal").innerText = formatTime(est.tempo_total_gasto);
+
+            // Popula Tabelas
+            const ranking = res.ranking;
+            const freqArea = document.getElementById("frequenciaArea");
+            const rankArea = document.getElementById("rankingArea");
+
+            if (ranking && ranking.length > 0) {
+                // Tabela de Frequência (ordena por vezes)
+                let freqSort = [...ranking].sort((a,b) => b.frequencia - a.frequencia);
+                let htmlFreq = `<table><tr><th>Aluno</th><th>Saídas</th></tr>`;
+                freqSort.forEach(r => {
+                    htmlFreq += `<tr>
+                        <td><strong>${r.nome}</strong> <br><small>ID: ${r.id_alunos}</small></td>
+                        <td><span style="font-size:1.1rem; font-weight:bold; color:var(--azul-marinho);">${r.frequencia}x</span></td>
+                    </tr>`;
+                });
+                htmlFreq += `</table>`;
+                freqArea.innerHTML = htmlFreq;
+
+                // Tabela de Ranking de Tempo (ordena por tempo total gasto)
+                let tempSort = [...ranking].sort((a,b) => b.tempo_acumulado - a.tempo_acumulado);
+                let htmlRank = `<table><tr><th>Ranking</th><th>Aluno</th><th>Tempo Acumulado</th></tr>`;
+                tempSort.forEach((r, idx) => {
+                    let badge = '';
+                    if (idx === 0) badge = '🥇 1º';
+                    else if (idx === 1) badge = '🥈 2º';
+                    else if (idx === 2) badge = '🥉 3º';
+                    else badge = `${idx+1}º`;
+
+                    htmlRank += `<tr>
+                        <td><span style="font-size:1.2rem;">${badge}</span></td>
+                        <td>${r.nome}</td>
+                        <td><strong style="color:var(--status-andamento); font-size:1.1rem;">${formatTime(r.tempo_acumulado)}</strong></td>
+                    </tr>`;
+                });
+                htmlRank += `</table>`;
+                rankArea.innerHTML = htmlRank;
+
+            } else {
+                freqArea.innerHTML = "<p>Nenhum registro concluído encontrado para o dia de hoje.</p>";
+                rankArea.innerHTML = "<p>Nenhum registro concluído encontrado para o dia de hoje.</p>";
+            }
         }
-        atualizarUI(dados);
-    } catch (error) {
-        console.error("Erro ao carregar dashboard:", error);
+    } catch (e) {
+        console.error("Erro ao carregar as estatísticas:", e);
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    carregarDashboard();
-    // Atualiza o dashboard a cada 15 segundos
-    setInterval(carregarDashboard, 15000);
-});
