@@ -6,58 +6,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const idInput = document.getElementById("id_aluno");
     const preview = document.getElementById("nomeAlunoPreview");
 
-    // Verifica se os elementos do formulário existem (Página Início)
-    if (idInput && preview) {
-        idInput.addEventListener("input", async (e) => {
-            const id = e.target.value;
-            if(id.length > 0) {
-                try {
-                    const res = await fetch(`api/buscar_aluno.php?id=${id}`);
-                    const json = await res.json();
-                    if(json.status === 'success') {
-                        preview.innerHTML = `Identificado: <strong>${json.aluno.nome}</strong>`;
-                    } else {
-                        preview.innerHTML = `<span style='color:red;'>Nenhum aluno com este ID</span>`;
-                    }
-                } catch(e) {}
-            } else {
-                preview.innerHTML = "";
-            }
-        });
-    }
-
-    if (form && idInput) {
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const id = idInput.value;
-            if (!id) return;
-
+    idInput.addEventListener("input", async (e) => {
+        const id = e.target.value;
+        if(id.length > 0) {
             try {
-                const res = await fetch("api/registro.php", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({id_alunos: id})
-                });
-                const result = await res.json();
-                const msgBox = document.getElementById("mensagem");
-                
-                if (result.status === "success") {
-                    if (msgBox) msgBox.innerHTML = `<span class="status-concluido">✔ ${result.message}</span>`;
-                    idInput.value = "";
-                    if (preview) preview.innerHTML = "";
+                const res = await fetch(`api/buscar_aluno.php?id=${id}`);
+                const json = await res.json();
+                if(json.status === 'success') {
+                    preview.innerHTML = `Identificado: <strong>${json.aluno.nome}</strong>`;
                 } else {
-                    if (msgBox) msgBox.innerHTML = `<span style="color:red;">✖ ${result.message}</span>`;
+                    preview.innerHTML = `<span style='color:red;'>Nenhum aluno com este ID</span>`;
                 }
+            } catch(e) {}
+        } else {
+            preview.innerHTML = "";
+        }
+    });
 
-                carregarDados();
-                if (msgBox) {
-                    setTimeout(() => { msgBox.innerHTML = ""; }, 5000);
-                }
-            } catch (error) {
-                console.error("Erro na requisição:", error);
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = idInput.value;
+        if (!id) return;
+
+        try {
+            const res = await fetch("api/registro.php", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({id_alunos: id})
+            });
+            const result = await res.json();
+            const msgBox = document.getElementById("mensagem");
+            
+            if (result.status === "success") {
+                msgBox.innerHTML = `<span class="status-concluido">✔ ${result.message}</span>`;
+                idInput.value = "";
+                preview.innerHTML = "";
+            } else {
+                msgBox.innerHTML = `<span style="color:red;">✖ ${result.message}</span>`;
             }
-        });
-    }
+
+            carregarDados();
+            setTimeout(() => { msgBox.innerHTML = ""; }, 5000);
+        } catch (error) {
+            console.error("Erro na requisição:", error);
+        }
+    });
 
     // --- LÓGICA DE RIPPLE EXTRAÍDA PARA UI.JS ---
 });
