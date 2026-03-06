@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Banheiro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--panel-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(13, 19, 33, 0.05);
+            border-top: 4px solid var(--secondary-color);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--border-color);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .ranking-badge {
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+            background: var(--warning-bg);
+            color: var(--warning-text);
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .ranking-1 {
+            background: #fef08a;
+            color: #854d0e;
+        }
+
+        .ranking-2 {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .ranking-3 {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <button class="nav-btn" onclick="window.location.href='index.html'">Controle de saida</button>
+            <button class="nav-btn active">Dashboard</button>
+            <button class="nav-btn">Calendário</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+            </div>
+            <h1>Dashboard do Dia</h1>
+            <p>Resumo das estatísticas de saída dos alunos</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Cards de Estatísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total de Saídas Hoje</div>
+                    <div class="stat-value" id="statTotalSaidas">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Alunos Distintos</div>
+                    <div class="stat-value" id="statTotalAlunos">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tempo Médio Fora</div>
+                    <div class="stat-value" id="statTempoMedio">0 m</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tempo Total Fora</div>
+                    <div class="stat-value" id="statTempoTotal">0 h 0 m</div>
+                </div>
+            </div>
+
+            <div class="flex-row">
+                <!-- Tabela de Alunos que Saíram -->
+                <section class="panel history-panel" style="flex: 1.5;">
+                    <div class="panel-header">
+                        <h2>Relatório de Alunos</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome do Aluno</th>
+                                    <th>Qtd. Saídas</th>
+                                    <th>Tempo Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyAlunos">
+                                <tr>
+                                    <td colspan="3" class="empty-state text-center">Carregando dados...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Ranking -->
+                <section class="panel queue-panel" style="flex: 1;">
+                    <div class="panel-header">
+                        <h2>Top Demorados</h2>
+                    </div>
+                    <ul id="listaRanking" class="fila-list">
+                        <li class="empty-state text-center">Carregando dados...</li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

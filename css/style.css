@@ -1,0 +1,294 @@
+/* Variáveis e Reset com base no pallete.png */
+:root {
+    --bg-color: #F0EBD8;       /* Bege Pastel (60%) */
+    --panel-bg: #FFFFFF;       /* Branco para contraste dos painéis */
+    --primary-color: #1D2D44;  /* Azul Marinho Escuro (10% - Destaques básicos) */
+    --action-color: #0D1321;   /* Preto/Azul Profundo (Textos Principais e Botões de Ação) */
+    --secondary-color: #748CAB;/* Azul Suave (30% - Apoio visual) */
+    --border-color: #3E5C76;   /* Azul Cinzento (Bordas) */
+    
+    --success-bg: #dcfce7;
+    --success-text: #166534;
+    --warning-bg: #fef9c3;
+    --warning-text: #854d0e;
+    --error-bg: #fee2e2;
+    --error-text: #991b1b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--action-color);
+    line-height: 1.6;
+}
+
+/* Navbar Superior */
+.top-nav {
+    width: 100%;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.nav-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-btn {
+    background: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--action-color);
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn.active, .nav-btn:hover {
+    background: var(--border-color);
+    color: #fff;
+}
+
+/* Container Principal */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Cabeçalho centralizado */
+.header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.header-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    background-color: var(--secondary-color);
+    color: #fff;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+
+h1 { 
+    font-size: 2rem; 
+    color: var(--action-color); 
+    font-weight: 700;
+}
+.header p { 
+    color: var(--border-color); 
+    font-size: 1.1rem;
+}
+
+/* Panels */
+.panel {
+    background: var(--panel-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(13, 19, 33, 0.05); /* Sombra suave */
+    margin-bottom: 1.5rem;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+h2 { 
+    font-size: 1.25rem; 
+    color: var(--primary-color);
+}
+
+.date-display {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.flex-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.flex-row > * {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Status Panel */
+.status-panel {
+    text-align: center;
+    border: 2px solid var(--secondary-color);
+}
+.status-indicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+.status-indicator.available { background-color: #22c55e; }
+.status-indicator.busy { background-color: #ef4444; }
+
+.status-text {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Painel de Inserção */
+.insert-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.input-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--action-color);
+    display: block;
+}
+
+/* Input acoplado ao botão */
+.input-group {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+}
+
+#idAluno {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 2px solid var(--border-color);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    font-size: 1rem;
+    outline: none;
+    color: var(--action-color);
+}
+
+#idAluno:focus {
+    border-color: var(--primary-color);
+}
+
+.btn.primary {
+    background-color: var(--action-color);
+    color: #fff;
+    border: 2px solid var(--action-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 0 8px 8px 0; /* Colado à direita */
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Message Box */
+.message-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    width: 100%;
+}
+.message-box.hidden { display: none; }
+.success { background: var(--success-bg); color: var(--success-text); border: 1px solid #bbf7d0; }
+.error { background: var(--error-bg); color: var(--error-text); border: 1px solid #fecaca; }
+.warning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid #fef08a; }
+
+/* Ativo / Fila / Tabela */
+.ativo-container .ativo-card {
+    background: var(--warning-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #fef08a;
+    text-align: left;
+}
+.ativo-card h3 { color: var(--warning-text); margin-bottom: 0.5rem; }
+
+.fila-list {
+    list-style: none;
+}
+.fila-list li {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+}
+.fila-list li:last-child {
+    border-bottom: none;
+}
+.empty-state {
+    color: var(--secondary-color);
+    font-style: italic;
+}
+.text-center { text-align: center; }
+
+/* Tabelas */
+.table-container {
+    overflow-x: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+th, td {
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+th {
+    font-weight: 600;
+    color: var(--border-color);
+}
+tbody tr:hover {
+    background-color: #f8fafc;
+}
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.badge-andamento { background: var(--warning-bg); color: var(--warning-text); }
+.badge-concluido { background: var(--success-bg); color: var(--success-text); }
+
+@media (max-width: 768px) {
+    .flex-row {
+        flex-direction: column;
+    }
+    .input-group {
+        flex-direction: column;
+    }
+    #idAluno {
+        border-right: 2px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    .btn.primary {
+        border-radius: 8px;
+        width: 100%;
+    }
+}
