@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Banheiro</title>
     <link rel="stylesheet" href="css/style.css?v=2.1">
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>Controle de Banheiro</h1>
-            <nav>
-                <a href="index.html">Início</a>
-                <a href="dashboard.html">Estatísticas</a>
-                <a href="calendario.html">Histórico</a>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>Controle de Banheiro</h1>
+                <div>
+                    <a href="admin.html" class="nav-action">Trocar Turma</a>
+                    <a href="#" onclick="fazerLogout()" class="nav-action nav-action-danger">Sair</a>
+                </div>
+            </div>
+            <nav id="mainNav">
+                <a href="index.html" class="nav-link" data-target="index.html">Início</a>
+                <a href="dashboard.html" class="nav-link" data-target="dashboard.html">Estatísticas</a>
+                <a href="calendario.html" class="nav-link" data-target="calendario.html">Histórico</a>
             </nav>
         </header>
 
@@ -22,10 +30,12 @@
                 <h2>Registrar Saída/Retorno</h2>
                 <form id="formRegistro" style="display: flex; gap: 10px; align-items: start;">
                     <div style="flex-grow: 1;">
-                        <input type="number" id="id_aluno" placeholder="Digite o ID do Aluno" required autocomplete="off" style="width: 100%;">
-                        <div id="nomeAlunoPreview" style="margin-top:8px; font-weight:bold; color:var(--azul-marinho); min-height:20px;"></div>
+                        <input type="number" id="id_aluno" placeholder="Digite o Nº da Chamada" required
+                            autocomplete="off" style="width: 100%;">
+                        <div id="nomeAlunoPreview"
+                            style="margin-top:8px; font-weight:bold; color:var(--azul-marinho); min-height:20px;"></div>
                     </div>
-                    <button type="submit">Confirmar</button>
+                    <button type="submit" class="btn-confirmar btn-confirmar-action">Confirmar</button>
                 </form>
                 <div id="mensagem" style="margin-top:10px; font-weight:500;"></div>
             </div>
@@ -50,5 +60,26 @@
     </div>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = window.location.search;
+            if (params) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    const target = link.getAttribute('data-target');
+                    link.href = `${target}${params}`;
+                });
+            }
+        });
+
+        async function fazerLogout() {
+            try {
+                await fetch('api/logout.php');
+                window.location.href = 'login.html';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
 </body>
+
 </html>

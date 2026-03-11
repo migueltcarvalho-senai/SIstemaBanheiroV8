@@ -7,7 +7,9 @@ $db = Database::getInstance();
 $registro = new Registro($db);
 
 $data = isset($_GET['data']) ? $_GET['data'] : date('Y-m-d');
-$registros = $registro->getRegistrosPorData($data);
+$id_turma = isset($_GET['id_turma']) ? intval($_GET['id_turma']) : null;
+
+$registros = $registro->getRegistrosPorData($data, $id_turma);
 
 echo json_encode([
     "status" => "success",

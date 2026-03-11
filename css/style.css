@@ -4,11 +4,11 @@
     --bg-mid: #0A3D79;
     --bg-blue: #00519C;
     --bg-dark: #0D366D;
-    
+
     /* Paleta Menu - Extraída de menu.png */
     --menu-bg: #022577;
     --menu-accent: #002A8B;
-    
+
     /* Paleta Botão - Extraída de button.png (Cyan Spark) */
     --btn-start: #0096D1;
     --btn-mid: #00ABD1;
@@ -17,16 +17,20 @@
     /* Tema Clear Frost (Cards Brancos/Cinzas) */
     --card-bg: rgba(255, 255, 255, 0.9);
     --card-bg-hover: rgba(248, 250, 252, 0.95);
-    --text-primary: #0f172a; /* Preto/Slate Profundo */
-    --text-secondary: #475569; /* Cinza Escuro */
+    --text-primary: #0f172a;
+    /* Preto/Slate Profundo */
+    --text-secondary: #475569;
+    /* Cinza Escuro */
     --card-border: rgba(0, 0, 0, 0.05);
-    
-    --status-andamento: #ca8a04; 
+
+    --status-andamento: #ca8a04;
     --status-concluido: #16a34a;
     --fonte: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     font-family: var(--fonte);
@@ -35,17 +39,16 @@ body {
     padding: 20px;
     min-height: 100vh;
     /* Fundo Animado "Midnight Flow" */
-    background: linear-gradient(-45deg, 
-        var(--bg-deep), 
-        var(--bg-dark), 
-        var(--bg-mid), 
-        var(--bg-blue)
-    );
+    background: linear-gradient(-45deg,
+            var(--bg-deep),
+            var(--bg-dark),
+            var(--bg-mid),
+            var(--bg-blue));
     background-size: 400% 400%;
-    animation: nebulaFlow 20s ease-in-out infinite; 
+    animation: nebulaFlow 20s ease-in-out infinite;
     overflow-x: hidden;
     background-attachment: fixed;
-    
+
     /* Estado inicial para transição de página */
     opacity: 0;
     transform: translateY(10px);
@@ -63,9 +66,17 @@ body.page-exit {
 }
 
 @keyframes nebulaFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .container {
@@ -79,7 +90,7 @@ header {
     background: var(--menu-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    color: white; 
+    color: white;
     padding: 15px 25px;
     border-radius: 16px;
     display: flex;
@@ -89,12 +100,13 @@ header {
     margin-bottom: 25px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     position: relative;
-    overflow: hidden; /* Importante para o ripple global */
+    overflow: hidden;
+    /* Importante para o ripple global */
 }
 
-header h1 { 
-    margin: 0; 
-    font-size: 1.4rem; 
+header h1 {
+    margin: 0;
+    font-size: 1.4rem;
     letter-spacing: -0.025em;
     color: white;
     z-index: 2;
@@ -110,7 +122,7 @@ header nav a {
     margin-left: 20px;
     font-weight: 500;
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.3s ease;
 }
 
@@ -119,25 +131,73 @@ header nav a:hover {
     color: white;
 }
 
+/* Botões de ação no header (Trocar Turma / Sair) */
+.nav-action {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 8px 18px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-left: 10px;
+}
+
+.nav-action:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px -4px rgba(0, 0, 0, 0.3);
+}
+
+.nav-action-danger {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.nav-action-danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fecaca;
+    box-shadow: 0 6px 15px -4px rgba(239, 68, 68, 0.3);
+}
+
 .card {
     background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     padding: 25px;
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    /* Bordas levemente mais dinâmicas */
+    border: 1px solid rgba(255, 255, 255, 0.6);
     margin-bottom: 25px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-        0 2px 4px -1px rgba(0, 0, 0, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Curva spring suave */
+    box-shadow:
+        0 10px 30px -10px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    position: relative;
+    /* Animação inicial */
+    animation: fadeScale 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Pseudo-classe avançada: Reação do card quando um input ganha foco dentro dele */
+.card:has(input:focus) {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow:
+        0 20px 40px -10px rgba(0, 150, 209, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(0, 150, 209, 0.3);
 }
 
 .card:hover {
     transform: translateY(-4px);
-    background: white;
-    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow:
+        0 20px 35px -5px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .card h2 {
@@ -150,28 +210,40 @@ header nav a:hover {
     letter-spacing: -0.01em;
 }
 
-input[type="number"], input[type="date"] {
+input[type="number"],
+input[type="date"],
+input[type="text"],
+input[type="password"] {
     width: 60%;
     padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-bottom: 2px solid rgba(0, 42, 139, 0.2);
+    border-radius: 12px 12px 4px 4px;
     font-size: 1rem;
     color: var(--text-primary);
     outline: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 input::placeholder {
     color: #94a3b8;
     font-size: 0.95rem;
+    transition: color 0.3s;
 }
 
 input:focus {
-    border-color: var(--btn-start);
     background: white;
-    box-shadow: 0 0 0 4px rgba(0, 150, 209, 0.15);
-    transform: translateY(-1px);
+    border-bottom-color: var(--btn-start);
+    box-shadow:
+        0 4px 15px -5px rgba(0, 150, 209, 0.2),
+        inset 0 2px 4px rgba(0, 0, 0, 0.01);
+    transform: translateY(-2px);
+}
+
+input:focus::placeholder {
+    color: transparent;
 }
 
 button {
@@ -179,31 +251,43 @@ button {
     background: linear-gradient(135deg, var(--btn-start), var(--btn-mid), var(--btn-end));
     color: white;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     font-size: 0.95rem;
     cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 15px -3px rgba(0, 150, 209, 0.3);
+    font-weight: 700;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Curva elástica/spring */
+    box-shadow:
+        0 4px 10px -2px rgba(0, 150, 209, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
     position: relative;
     overflow: hidden;
+    transform-origin: center;
 }
 
 button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 20px -3px rgba(0, 150, 209, 0.4);
-    filter: brightness(1.1);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow:
+        0 15px 25px -4px rgba(0, 150, 209, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    filter: saturate(1.2) brightness(1.05);
+    /* Mais saturação vibrante em vez de bright genérico */
 }
 
-.status-andamento { 
-    color: var(--status-andamento); 
+button:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+.status-andamento {
+    color: var(--status-andamento);
     font-weight: 700;
     background: #fefce8;
     padding: 2px 8px;
     border-radius: 6px;
 }
-.status-concluido { 
-    color: var(--status-concluido); 
+
+.status-concluido {
+    color: var(--status-concluido);
     font-weight: 700;
     background: #f0fdf4;
     padding: 2px 8px;
@@ -230,25 +314,39 @@ th {
 td {
     padding: 20px 15px;
     background: white;
-    border-top: 1px solid rgba(0,0,0,0.03);
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    border-top: 1px solid rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
     color: var(--text-primary);
     transition: all 0.2s ease;
 }
 
-td:first-child { 
-    border-left: 1px solid rgba(0,0,0,0.03); 
-    border-top-left-radius: 16px; 
-    border-bottom-left-radius: 16px; 
+td:first-child {
+    border-left: 1px solid rgba(0, 0, 0, 0.03);
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
 }
-td:last-child { 
-    border-right: 1px solid rgba(0,0,0,0.03); 
-    border-top-right-radius: 16px; 
-    border-bottom-right-radius: 16px; 
+
+td:last-child {
+    border-right: 1px solid rgba(0, 0, 0, 0.03);
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
+/* Reação de contraste em Tabelas (Layered Focus) usando :has global se o navegador suportar, via CSS. */
+/* Se passar o mouse na tabela, esmaeça quem não for hoverado */
+table:hover td {
+    opacity: 0.6;
+    transform: scale(0.99);
 }
 
 tr:hover td {
     background: #f1f5f9;
+    opacity: 1;
+    /* Ignora o fade da tabela e traz pra frente */
+    transform: scale(1.01) translateY(-1px);
+    box-shadow: 0 5px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    position: relative;
 }
 
 .dashboard-grid {
@@ -304,4 +402,72 @@ tr:hover td {
         transform: scale(4);
         opacity: 0;
     }
+}
+
+/* ========================================================
+   ANIMAÇÕES DE ENTRADA (MANDATÓRIO FRONTEND ARCHITECT)
+======================================================== */
+@keyframes fadeScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes slideUpBlur {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+        filter: blur(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* Classes utilitárias para staggered animations (inseridas dinamicamente) */
+.animate-slide-up {
+    animation: slideUpBlur 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    /* Começa invisível para a animação dominar */
+}
+
+/* ========================================================
+   BOTÕES ESTILIZADOS PARA PÁGINAS OPERACIONAIS
+======================================================== */
+
+/* Botão de confirmar (index.html) */
+.btn-confirmar {
+    padding: 14px 32px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+}
+
+/* Botões do calendário (Anterior/Próximo) */
+.btn-calendario {
+    padding: 10px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 120px;
+}
+
+/* Botão de confirmar no index - cor especial */
+.btn-confirmar-action {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 15px -3px rgba(16, 185, 129, 0.4);
+}
+
+.btn-confirmar-action:hover {
+    box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.5);
 }

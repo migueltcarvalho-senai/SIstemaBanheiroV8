@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Professor - Gestão de Turmas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* =============================================
+           ADMIN - Design Flutuante Contemporâneo
+        ============================================= */
+        body {
+            padding: 2rem;
+        }
+
+        /* Container centralizado */
+        .admin-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        /* Header flutuante do painel */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 20px 28px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .admin-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        /* Botão Sair estilizado */
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            padding: 10px 22px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fecaca;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Cards de seção com cantos extra-arredondados */
+        .section-card {
+            padding: 32px;
+            border-radius: 28px;
+            margin-bottom: 2rem;
+        }
+
+        .section-card h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            border: none;
+            padding-bottom: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .section-card h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+            border-radius: 2px;
+            margin-top: 10px;
+        }
+
+        /* Área de criação de turma/aluno */
+        .create-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .create-row input {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            background: rgba(241, 245, 249, 0.8);
+            border: 2px solid transparent;
+            border-bottom: 2px solid rgba(0, 42, 139, 0.1);
+            font-size: 0.95rem;
+        }
+
+        .create-row input:focus {
+            border-color: var(--btn-start);
+            background: white;
+            border-radius: 16px;
+        }
+
+        .create-row button {
+            padding: 14px 24px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* Remove as setas de incremento */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* Lista de turmas/alunos - cards flutuantes individuais */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 22px;
+            background: rgba(241, 245, 249, 0.6);
+            border-radius: 18px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .item-card .item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .item-card .item-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+            color: white;
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .item-card .item-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .item-card .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Botões de ação nas listas */
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            box-shadow: none;
+        }
+
+        .btn-manage {
+            background: rgba(0, 150, 209, 0.1);
+            color: var(--btn-start);
+            border: 1px solid rgba(0, 150, 209, 0.2);
+        }
+
+        .btn-manage:hover {
+            background: rgba(0, 150, 209, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px -4px rgba(0, 150, 209, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px -4px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Botão de voltar */
+        .btn-back {
+            background: rgba(100, 116, 139, 0.1);
+            color: #64748b;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            padding: 10px 20px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            box-shadow: none;
+        }
+
+        .btn-back:hover {
+            background: rgba(100, 116, 139, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px -4px rgba(100, 116, 139, 0.3);
+        }
+
+        /* Seção Alunos escondida */
+        #alunosSection {
+            display: none;
+        }
+
+        /* Subtítulo da seção */
+        .section-subtitle {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Divisor visual */
+        .divider {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        /* Botão gigante de Iniciar */
+        .btn-start-system {
+            padding: 18px 36px;
+            font-size: 1.1rem;
+            border-radius: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #10b981, #059669);
+            letter-spacing: 0.02em;
+            box-shadow: 0 8px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-start-system:hover {
+            box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Mensagens */
+        .msg-area {
+            min-height: 24px;
+            margin-top: 8px;
+        }
+
+        .msg-area .error {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .msg-area .success {
+            color: #10b981;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .empty-state span {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-container">
+        <!-- Header flutuante -->
+        <div class="admin-header">
+            <h1>📚 Painel do Professor</h1>
+            <button class="btn-logout" onclick="logout()">✕ Sair</button>
+        </div>
+
+        <!-- ========= SEÇÃO DE TURMAS ========= -->
+        <div id="turmasSection" class="card section-card">
+            <h2>Minhas Turmas</h2>
+
+            <div class="create-row">
+                <input type="text" id="novaTurmaNome" placeholder="Ex: 3º Ano B - Manhã">
+                <button onclick="criarTurma()">＋ Criar Turma</button>
+            </div>
+            <div class="msg-area" id="turmasMsg"></div>
+
+            <div class="item-list" id="listaTurmas">
+                <div class="empty-state"><span>📂</span>Carregando turmas...</div>
+            </div>
+        </div>
+
+        <!-- ========= SEÇÃO DE ALUNOS ========= -->
+        <div id="alunosSection" class="card section-card">
+            <h2 id="tituloTurma">Gestão de Alunos</h2>
+            <button class="btn-back" onclick="voltarParaTurmas()">← Voltar para Turmas</button>
+
+            <p class="section-subtitle">Adicionar Aluno</p>
+            <div class="create-row">
+                <input type="number" id="novoAlunoNumero" placeholder="Nº" min="1"
+                    style="max-width: 90px; flex: 0 0 90px;">
+                <input type="text" id="novoAlunoNome" placeholder="Nome completo do aluno">
+                <button onclick="adicionarAluno()">＋ Adicionar</button>
+            </div>
+            <div class="msg-area" id="alunosMsg"></div>
+
+            <div class="item-list" id="listaAlunos">
+                <div class="empty-state"><span>👤</span>Carregando alunos...</div>
+            </div>
+
+            <div class="divider">
+                <button class="btn-start-system" onclick="iniciarSistemaParaTurma()">
+                    ▶ INICIAR SISTEMA DE ENTRADAS
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let turmaAtualId = null;
+        let turmaAtualNome = '';
+
+        // Verificar sessão ao carregar a página
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('api/auth_check.php');
+                const data = await res.json();
+                if (data.status !== 'logado') {
+                    window.location.href = 'login.html';
+                } else {
+                    carregarTurmas();
+                }
+            } catch (e) {
+                console.error("Erro ao verificar sessão");
+            }
+        });
+
+        // Logout do professor
+        async function logout() {
+            await fetch('api/logout.php');
+            window.location.href = 'login.html';
+        }
+
+        // ==========================================
+        //  GESTÃO DE TURMAS
+        // ==========================================
+        async function carregarTurmas() {
+            const lista = document.getElementById('listaTurmas');
+            try {
+                const res = await fetch('api/gestao_turmas.php');
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    lista.innerHTML = '';
+                    if (data.turmas.length === 0) {
+                        lista.innerHTML = '<div class="empty-state"><span>📂</span>Nenhuma turma cadastrada ainda.</div>';
+                    } else {
+                        data.turmas.forEach((t, i) => {
+                            let delay = i * 0.05;
+                            lista.innerHTML += `
+                                <div class="item-card animate-slide-up" style="animation-delay: ${delay}s">
+                                    <div class="item-info">
+                                        <span class="item-name">${t.nome}</span>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="btn-action btn-manage btn-manage-alunos" data-id="${t.id}" data-nome="${t.nome.replace(/"/g, '&quot;')}">Gerenciar</button>
+                                        <button class="btn-action btn-delete btn-excluir-turma" data-id="${t.id}" data-nome="${t.nome.replace(/"/g, '&quot;')}">Excluir</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch (e) {
+                lista.innerHTML = '<div class="empty-state" style="color:#ef4444;">Erro ao carregar turmas.</div>';
+            }
+        }
+
+        // Criar nova turma
+        async function criarTurma() {
+            const nomeInput = document.getElementById('novaTurmaNome');
+            const nome = nomeInput.value.trim();
+            const msg = document.getElementById('turmasMsg');
+
+            if (!nome) return;
+
+            try {
+                const res = await fetch('api/gestao_turmas.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    msg.innerHTML = `<p class="success">✔ ${data.message}</p>`;
+                    nomeInput.value = '';
+                    carregarTurmas();
+                } else {
+                    msg.innerHTML = `<p class="error">✖ ${data.message}</p>`;
+                }
+            } catch (e) {
+                msg.innerHTML = '<p class="error">Erro ao criar turma.</p>';
+            }
+            setTimeout(() => msg.innerHTML = '', 3000);
+        }
+
+        // Excluir turma
+        async function excluirTurma(id, nome) {
+            if (confirm(`Tem certeza que deseja EXCLUIR a turma "${nome}"?\n\nTodos os alunos e registros desta turma serão apagados!`)) {
+                try {
+                    const res = await fetch('api/gestao_turmas.php', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: parseInt(id) })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        carregarTurmas();
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (e) {
+                    alert('Erro ao excluir turma.');
+                }
+            }
+        }
+
+        // Delegação de eventos para turmas
+        document.getElementById('listaTurmas').addEventListener('click', function (e) {
+            const btnExcluir = e.target.closest('.btn-excluir-turma');
+            const btnGerenciar = e.target.closest('.btn-manage-alunos');
+
+            if (btnExcluir) {
+                excluirTurma(btnExcluir.getAttribute('data-id'), btnExcluir.getAttribute('data-nome'));
+            } else if (btnGerenciar) {
+                gerenciarTurma(btnGerenciar.getAttribute('data-id'), btnGerenciar.getAttribute('data-nome'));
+            }
+        });
+
+        // ==========================================
+        //  GESTÃO DE ALUNOS
+        // ==========================================
+        function gerenciarTurma(id, nome) {
+            turmaAtualId = id;
+            turmaAtualNome = nome;
+            document.getElementById('turmasSection').style.display = 'none';
+            document.getElementById('alunosSection').style.display = 'block';
+            document.getElementById('tituloTurma').innerText = `Alunos — ${nome}`;
+            carregarAlunos();
+        }
+
+        function voltarParaTurmas() {
+            turmaAtualId = null;
+            turmaAtualNome = '';
+            document.getElementById('turmasSection').style.display = 'block';
+            document.getElementById('alunosSection').style.display = 'none';
+        }
+
+        async function carregarAlunos() {
+            const lista = document.getElementById('listaAlunos');
+            try {
+                const res = await fetch(`api/gestao_alunos.php?id_turma=${turmaAtualId}`);
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    lista.innerHTML = '';
+                    if (data.alunos.length === 0) {
+                        lista.innerHTML = '<div class="empty-state"><span>👤</span>Nenhum aluno cadastrado nesta turma.</div>';
+                    } else {
+                        data.alunos.forEach((a, i) => {
+                            let delay = i * 0.05;
+                            lista.innerHTML += `
+                                <div class="item-card animate-slide-up" style="animation-delay: ${delay}s">
+                                    <div class="item-info">
+                                        <span class="item-number">${a.numero_chamada}</span>
+                                        <span class="item-name">${a.nome}</span>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="btn-action btn-delete btn-excluir-aluno" data-id="${a.id}" data-nome="${a.nome.replace(/"/g, '&quot;')}">Excluir</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch (e) {
+                lista.innerHTML = '<div class="empty-state" style="color:#ef4444;">Erro ao carregar alunos.</div>';
+            }
+        }
+
+        // Adicionar aluno
+        async function adicionarAluno() {
+            const nomeInput = document.getElementById('novoAlunoNome');
+            const numInput = document.getElementById('novoAlunoNumero');
+            const msg = document.getElementById('alunosMsg');
+
+            const nome = nomeInput.value.trim();
+            const num = numInput.value.trim();
+
+            if (!nome || !num) return;
+
+            try {
+                const res = await fetch('api/gestao_alunos.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: nome,
+                        numero_chamada: num,
+                        id_turma: turmaAtualId
+                    })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    msg.innerHTML = `<p class="success">✔ ${data.message}</p>`;
+                    nomeInput.value = '';
+                    numInput.value = '';
+                    nomeInput.focus();
+                    carregarAlunos();
+                } else {
+                    msg.innerHTML = `<p class="error">✖ ${data.message}</p>`;
+                }
+            } catch (e) {
+                msg.innerHTML = '<p class="error">Erro ao adicionar aluno.</p>';
+            }
+            setTimeout(() => msg.innerHTML = '', 3000);
+        }
+
+        // Excluir aluno
+        async function excluirAluno(id, nome) {
+            if (confirm(`Tem certeza que deseja excluir o aluno "${nome}"?`)) {
+                try {
+                    const res = await fetch('api/gestao_alunos.php', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: parseInt(id) })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        carregarAlunos();
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (e) {
+                    alert('Erro ao excluir aluno.');
+                }
+            }
+        }
+
+        // Delegação de eventos para excluir alunos
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-excluir-aluno');
+            if (btn) {
+                excluirAluno(btn.getAttribute('data-id'), btn.getAttribute('data-nome'));
+            }
+        });
+
+        // Iniciar o sistema com a turma selecionada
+        function iniciarSistemaParaTurma() {
+            window.location.href = `index.html?turma_id=${turmaAtualId}&turma_nome=${encodeURIComponent(turmaAtualNome)}`;
+        }
+    </script>
+    <script src="js/ui.js"></script>
+</body>
+
+</html>

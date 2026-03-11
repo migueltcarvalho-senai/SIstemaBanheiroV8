@@ -11,62 +11,72 @@ $registro = new Registro($db);
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    // Retorna o status atual do painel principal (quem está fora, fila e registros limitados de hoje)
-    $ativo = $registro->getAtivo();
-    $fila = $registro->getFila();
-    $hoje = $registro->getRegistrosHoje();
-    
+    // Lendo o id_turma da query string
+    $id_turma = isset($_GET['id_turma']) ? intval($_GET['id_turma']) : null;
+
+    // Retorna o status atual do painel principal
+    $ativo = $registro->getAtivo($id_turma);
+    $fila = $registro->getFila($id_turma);
+    $hoje = $registro->getRegistrosHoje($id_turma);
+
     echo json_encode([
-        "status" => "success", 
-        "ativo" => $ativo, 
-        "fila" => $fila, 
+        "status" => "success",
+        "ativo" => $ativo,
+        "fila" => $fila,
         "registros" => $hoje
     ]);
 
-} elseif ($method === 'POST') {
+}
+elseif ($method === 'POST') {
     $data = json_decode(file_get_contents("php://input"));
-    
-    if (!isset($data->id_alunos) || empty($data->id_alunos)) {
-        echo json_encode(["status" => "error", "message" => "ID do aluno não informado."]);
+
+    // Valida os campos obrigatórios
+    if (!isset($data->numero_chamada) || !isset($data->id_turma)) {
+        echo json_encode(["status" => "error", "message" => "Número da chamada ou turma não informados."]);
         exit;
     }
-    
-    $id_alunos = $data->id_alunos;
-    
-    // 1. Verifica se o aluno existe
-    $dadosAluno = $aluno->getAlunoById($id_alunos);
+
+    $numero_chamada = intval($data->numero_chamada);
+    $id_turma = intval($data->id_turma);
+
+    // 1. Verifica se o aluno existe nesta turma com este número
+    $dadosAluno = $aluno->getAlunoByNumero($numero_chamada, $id_turma);
     if (!$dadosAluno) {
-        echo json_encode(["status" => "error", "message" => "Aluno não encontrado no banco."]);
+        echo json_encode(["status" => "error", "message" => "Aluno não encontrado nesta turma com este número."]);
         exit;
     }
-    
-    $ativo = $registro->getAtivo();
-    
-    // 2. Se o ID digitado for o mesmo do aluno que já está no banheiro (voltou)
-    if ($ativo && $ativo['id_alunos'] == $id_alunos) {
-        if ($registro->registrarRetorno($id_alunos)) {
+
+    // 2. Verifica se há alguém NO BANHEIRO desta turma
+    $ativo = $registro->getAtivo($id_turma);
+
+    // 2a. Se for o MESMO aluno ativo → registra o retorno
+    if ($ativo && $ativo['numero_chamada'] == $numero_chamada) {
+        if ($registro->registrarRetorno($numero_chamada, $id_turma)) {
             echo json_encode(["status" => "success", "message" => "Retorno registrado com sucesso. Próximo da fila (se houver) foi chamado."]);
-        } else {
+        }
+        else {
             echo json_encode(["status" => "error", "message" => "Erro ao registrar o retorno."]);
         }
         exit;
     }
-    
-    // 3. Se o banheiro estiver ocupado (alguém diferente), entra na fila
+
+    // 2b. Se há outro aluno ativo → entra na fila
     if ($ativo) {
-        if ($registro->entrarFila($id_alunos)) {
+        if ($registro->entrarFila($numero_chamada, $id_turma)) {
             echo json_encode(["status" => "success", "message" => "Banheiro Ocupado. Aluno adicionado à fila de espera."]);
-        } else {
+        }
+        else {
             echo json_encode(["status" => "error", "message" => "Este aluno já está na fila de espera."]);
         }
         exit;
     }
-    
-    // 4. Se o banheiro estiver livre, registra a saída imediatamente
-    if ($registro->registrarSaida($id_alunos)) {
-         echo json_encode(["status" => "success", "message" => "Saída registrada com sucesso."]);
-    } else {
-         echo json_encode(["status" => "error", "message" => "Erro desconhecido ao registrar saída."]);
+
+    // 2c. Banheiro livre → registra a saída imediatamente
+    if ($registro->registrarSaida($numero_chamada, $id_turma)) {
+        echo json_encode(["status" => "success", "message" => "Saída registrada com sucesso."]);
+    }
+    else {
+        echo json_encode(["status" => "error", "message" => "Erro desconhecido ao registrar saída."]);
     }
 }
 ?>

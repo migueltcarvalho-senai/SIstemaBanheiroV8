@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Banheiro</title>
+    <!-- Importa fonte Google Inter para tipografia moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* =============================================
+           LOGIN - Design Flutuante Minimalista
+        ============================================= */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container principal do login - card flutuante */
+        .login-wrapper {
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+        }
+
+        /* Ícone decorativo acima do card */
+        .login-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+            margin: 0 auto -40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 25px -5px rgba(0, 150, 209, 0.5);
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Card principal do login */
+        .login-card {
+            padding: 60px 40px 40px 40px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            border: none;
+            padding: 0;
+        }
+
+        .login-card .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Grupo do input com label flutuante */
+        .input-group {
+            position: relative;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1rem;
+            border-radius: 16px;
+            background: rgba(241, 245, 249, 0.8);
+            border: 2px solid transparent;
+            border-bottom: 2px solid rgba(0, 42, 139, 0.15);
+        }
+
+        .input-group input:focus {
+            border-color: var(--btn-start);
+            background: white;
+            border-radius: 16px;
+        }
+
+        /* Botão de login largo */
+        .btn-login {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.05rem;
+            border-radius: 16px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        /* Mensagem de feedback */
+        #loginMessage {
+            margin-top: 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .login-footer {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+        <!-- Avatar decorativo -->
+        <div class="login-avatar">🔐</div>
+
+        <!-- Card principal -->
+        <div class="card login-card">
+            <h2>Bem-vindo</h2>
+            <p class="subtitle">Entre com suas credenciais para acessar o painel</p>
+
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="senha">Senha de Acesso</label>
+                    <input type="password" id="senha" name="senha" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-login">Entrar no Sistema</button>
+            </form>
+
+            <div id="loginMessage"></div>
+            <p class="login-footer">Sistema de Controle de Banheiro v8</p>
+        </div>
+    </div>
+
+    <script>
+        // Lógica de autenticação via API
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const senha = document.getElementById('senha').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            try {
+                const response = await fetch('api/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ senha: senha })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    messageDiv.innerHTML = `<span style="color: var(--status-concluido);">${data.message} Redirecionando...</span>`;
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
+                } else {
+                    messageDiv.innerHTML = `<span style="color: #ef4444;">${data.message}</span>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<span style="color: #ef4444;">Erro ao connectar com o servidor.</span>`;
+            }
+        });
+    </script>
+    <script src="js/ui.js"></script>
+</body>
+
+</html>

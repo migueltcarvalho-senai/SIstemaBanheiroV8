@@ -1,63 +1,87 @@
 <?php
-class Registro {
+class Registro
+{
     private $conn;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
     // Busca aluno que está no banheiro (ativo)
-    public function getAtivo() {
-        $query = "SELECT r.id, r.id_alunos, a.nome, r.hora_saida 
+    public function getAtivo($id_turma = null)
+    {
+        $query = "SELECT r.id, r.numero_chamada, r.id_turma, a.nome, r.hora_saida 
                   FROM registros_saida r
-                  JOIN alunos a ON r.id_alunos = a.id
-                  WHERE r.status_alunos = 'EM_ANDAMENTO' 
-                  LIMIT 1";
+                  JOIN alunos a ON r.numero_chamada = a.numero_chamada AND r.id_turma = a.id_turma
+                  WHERE r.status_alunos = 'EM_ANDAMENTO'";
+
+        if ($id_turma) {
+            $query .= " AND r.id_turma = :id_turma";
+        }
+        $query .= " LIMIT 1";
+
         $stmt = $this->conn->prepare($query);
+        if ($id_turma) {
+            $stmt->bindParam(":id_turma", $id_turma, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Lista fila de espera
-    public function getFila() {
-        $query = "SELECT f.id, f.id_aluno as id_alunos, a.nome, f.hora_registro_fila as hora_entrada_fila
+    public function getFila($id_turma = null)
+    {
+        $query = "SELECT f.id, f.numero_chamada, f.id_turma, a.nome, f.hora_registro_fila as hora_entrada_fila
                   FROM fila_banheiro f
-                  JOIN alunos a ON f.id_aluno = a.id
-                  ORDER BY f.hora_registro_fila ASC";
+                  JOIN alunos a ON f.numero_chamada = a.numero_chamada AND f.id_turma = a.id_turma";
+
+        if ($id_turma) {
+            $query .= " WHERE f.id_turma = :id_turma";
+        }
+        $query .= " ORDER BY f.hora_registro_fila ASC";
+
         $stmt = $this->conn->prepare($query);
+        if ($id_turma) {
+            $stmt->bindParam(":id_turma", $id_turma, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Adiciona aluno à fila
-    public function entrarFila($id_alunos) {
+    public function entrarFila($numero_chamada, $id_turma)
+    {
         // Verifica se já está na fila
-        $query_check = "SELECT id FROM fila_banheiro WHERE id_aluno = :id_alunos";
+        $query_check = "SELECT id FROM fila_banheiro WHERE numero_chamada = :numero AND id_turma = :id_turma";
         $stmt_check = $this->conn->prepare($query_check);
-        $stmt_check->bindParam(":id_alunos", $id_alunos);
-        $stmt_check->execute();
-        if ($stmt_check->rowCount() > 0) return false;
+        $stmt_check->execute([':numero' => $numero_chamada, ':id_turma' => $id_turma]);
+        if ($stmt_check->rowCount() > 0)
+            return false;
 
-        $query = "INSERT INTO fila_banheiro (id_aluno, hora_registro_fila) VALUES (:id_alunos, NOW())";
+        $query = "INSERT INTO fila_banheiro (numero_chamada, id_turma, hora_registro_fila) VALUES (:numero, :id_turma, NOW())";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id_alunos", $id_alunos);
-        return $stmt->execute();
+        $stmt->execute([':numero' => $numero_chamada, ':id_turma' => $id_turma]);
+        return $stmt->rowCount() > 0;
     }
 
     // Registra a saída (entra no banheiro)
-    public function registrarSaida($id_alunos) {
-        // Verifica se já existe alguém (sistema trava para 1 por vez de fora)
-        if ($this->getAtivo()) return false;
+    public function registrarSaida($numero_chamada, $id_turma)
+    {
+        // Verifica se já existe alguém da MESMA TURMA ativo
+        if ($this->getAtivo($id_turma))
+            return false;
 
-        $query = "INSERT INTO registros_saida (id_alunos, hora_saida, status_alunos) 
-                  VALUES (:id_alunos, NOW(), 'EM_ANDAMENTO')";
+        $query = "INSERT INTO registros_saida (numero_chamada, id_turma, hora_saida, status_alunos) 
+                  VALUES (:numero, :id_turma, NOW(), 'EM_ANDAMENTO')";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id_alunos", $id_alunos);
-        return $stmt->execute();
+        $stmt->execute([':numero' => $numero_chamada, ':id_turma' => $id_turma]);
+        return $stmt->rowCount() > 0;
     }
 
     // Registra o retorno (sai do banheiro) e opcionalmente puxa próximo
-    public function registrarRetorno($id_alunos) {
+    public function registrarRetorno($numero_chamada, $id_turma)
+    {
         try {
             $this->conn->beginTransaction();
 
@@ -65,28 +89,29 @@ class Registro {
                       SET hora_retorno = NOW(), 
                           duracao_minutos = TIMESTAMPDIFF(MINUTE, hora_saida, NOW()),
                           status_alunos = 'CONCLUIDO' 
-                      WHERE id_alunos = :id_alunos AND status_alunos = 'EM_ANDAMENTO'";
+                      WHERE numero_chamada = :numero AND id_turma = :id_turma AND status_alunos = 'EM_ANDAMENTO'";
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":id_alunos", $id_alunos);
-            $stmt->execute();
+            $stmt->execute([':numero' => $numero_chamada, ':id_turma' => $id_turma]);
 
             // Puxar o próximo da fila
-            $this->proximoDaFila();
+            $this->proximoDaFila($id_turma);
 
             $this->conn->commit();
             return true;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             $this->conn->rollBack();
             return false;
         }
     }
 
     // Move primeiro da fila para o banheiro
-    private function proximoDaFila() {
-        $fila = $this->getFila(); // Já traz mapeado
+    private function proximoDaFila($id_turma)
+    {
+        $fila = $this->getFila($id_turma);
         if (count($fila) > 0) {
             $proximo = $fila[0];
-            $id_proximo = $proximo['id_alunos'];
+            $num_proximo = $proximo['numero_chamada'];
             $id_fila = $proximo['id'];
 
             // Remove da fila
@@ -96,64 +121,99 @@ class Registro {
             $s_del->execute();
 
             // Registra saída do próximo
-            $q_insert = "INSERT INTO registros_saida (id_alunos, hora_saida, status_alunos) 
-                         VALUES (:id_alunos, NOW(), 'EM_ANDAMENTO')";
+            $q_insert = "INSERT INTO registros_saida (numero_chamada, id_turma, hora_saida, status_alunos) 
+                         VALUES (:numero, :id_turma, NOW(), 'EM_ANDAMENTO')";
             $s_insert = $this->conn->prepare($q_insert);
-            $s_insert->bindParam(":id_alunos", $id_proximo);
-            $s_insert->execute();
+            $s_insert->execute([':numero' => $num_proximo, ':id_turma' => $id_turma]);
         }
     }
 
     // Retorna todos os registros de hoje
-    public function getRegistrosHoje() {
-        $query = "SELECT r.id, r.id_alunos, a.nome, r.hora_saida, r.hora_retorno, r.duracao_minutos as tempo_gasto, r.status_alunos 
+    public function getRegistrosHoje($id_turma = null)
+    {
+        $query = "SELECT r.id, r.numero_chamada, r.id_turma, a.nome, r.hora_saida, r.hora_retorno, r.duracao_minutos as tempo_gasto, r.status_alunos 
                   FROM registros_saida r
-                  JOIN alunos a ON r.id_alunos = a.id
-                  WHERE DATE(r.hora_saida) = CURDATE()
-                  ORDER BY r.hora_saida DESC";
+                  JOIN alunos a ON r.numero_chamada = a.numero_chamada AND r.id_turma = a.id_turma
+                  WHERE DATE(r.hora_saida) = CURDATE()";
+
+        if ($id_turma) {
+            $query .= " AND r.id_turma = :id_turma";
+        }
+        $query .= " ORDER BY r.hora_saida DESC";
+
         $stmt = $this->conn->prepare($query);
+        if ($id_turma) {
+            $stmt->bindParam(":id_turma", $id_turma, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Dashboard: Estatísticas de hoje
-    public function getEstatisticasHoje() {
+    public function getEstatisticasHoje($id_turma = null)
+    {
         $query = "SELECT 
                     COUNT(*) as total_saidas,
-                    COUNT(DISTINCT id_alunos) as total_alunos_distintos,
-                    COALESCE(SUM(duracao_minutos), 0) as tempo_total_gasto,
-                    COALESCE(AVG(duracao_minutos), 0) as tempo_medio
-                  FROM registros_saida 
-                  WHERE DATE(hora_saida) = CURDATE() AND status_alunos = 'CONCLUIDO'";
+                    COUNT(DISTINCT r.numero_chamada) as total_alunos_distintos,
+                    COALESCE(SUM(r.duracao_minutos), 0) as tempo_total_gasto,
+                    COALESCE(AVG(r.duracao_minutos), 0) as tempo_medio
+                  FROM registros_saida r
+                  JOIN alunos a ON r.numero_chamada = a.numero_chamada AND r.id_turma = a.id_turma
+                  WHERE DATE(r.hora_saida) = CURDATE() AND r.status_alunos = 'CONCLUIDO'";
+
+        if ($id_turma) {
+            $query .= " AND r.id_turma = :id_turma";
+        }
+
         $stmt = $this->conn->prepare($query);
+        if ($id_turma) {
+            $stmt->bindParam(":id_turma", $id_turma, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Dashboard: Ranking
-    public function getRankingHoje() {
-        $query = "SELECT r.id_alunos, a.nome, 
+    public function getRankingHoje($id_turma = null)
+    {
+        $query = "SELECT r.numero_chamada, r.id_turma, a.nome, 
                          COUNT(*) as frequencia, 
-                         COALESCE(SUM(duracao_minutos), 0) as tempo_acumulado
+                         COALESCE(SUM(r.duracao_minutos), 0) as tempo_acumulado
                   FROM registros_saida r
-                  JOIN alunos a ON r.id_alunos = a.id
-                  WHERE DATE(r.hora_saida) = CURDATE() AND r.status_alunos = 'CONCLUIDO'
-                  GROUP BY r.id_alunos, a.nome
+                  JOIN alunos a ON r.numero_chamada = a.numero_chamada AND r.id_turma = a.id_turma
+                  WHERE DATE(r.hora_saida) = CURDATE() AND r.status_alunos = 'CONCLUIDO'";
+
+        if ($id_turma) {
+            $query .= " AND r.id_turma = :id_turma";
+        }
+
+        $query .= " GROUP BY r.numero_chamada, r.id_turma, a.nome
                   ORDER BY tempo_acumulado DESC, frequencia DESC";
         $stmt = $this->conn->prepare($query);
+        if ($id_turma) {
+            $stmt->bindParam(":id_turma", $id_turma, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Calendário: Filtra por data e lista todos
-    public function getRegistrosPorData($data) {
-        $query = "SELECT r.id, r.id_alunos, a.nome, r.hora_saida, r.hora_retorno, r.duracao_minutos as tempo_gasto 
+    public function getRegistrosPorData($data, $id_turma = null)
+    {
+        $query = "SELECT r.id, r.numero_chamada, r.id_turma, a.nome, r.hora_saida, r.hora_retorno, r.duracao_minutos as tempo_gasto 
                   FROM registros_saida r
-                  JOIN alunos a ON r.id_alunos = a.id
-                  WHERE DATE(r.hora_saida) = :data
-                  ORDER BY r.hora_saida ASC";
+                  JOIN alunos a ON r.numero_chamada = a.numero_chamada AND r.id_turma = a.id_turma
+                  WHERE DATE(r.hora_saida) = :data";
+
+        if ($id_turma) {
+            $query .= " AND r.id_turma = :id_turma";
+        }
+        $query .= " ORDER BY r.hora_saida ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":data", $data);
+        if ($id_turma) {
+            $stmt->bindParam(":id_turma", $id_turma, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

@@ -1,99 +1,128 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histórico - Controle de Banheiro</title>
     <link rel="stylesheet" href="css/style.css?v=2.1">
     <style>
+        /* Calendário - Header de navegação */
         .calendario-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
+
         .calendario-header button {
-            padding: 8px 12px;
-            font-size: 0.9rem;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            border-radius: 14px;
         }
+
+        /* Grid principal do calendário */
         .calendario-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+            gap: 8px;
         }
+
+        /* Nomes dos dias da semana */
         .dia-semana {
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
             color: var(--text-secondary);
             padding: 10px 0;
-            background: #f1f5f9;
-            border-radius: 8px;
+            background: rgba(241, 245, 249, 0.8);
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
+
+        /* Quadrados individuais dos dias: QUADRADO PERFEITO */
         .dia {
+            aspect-ratio: 1 / 1;
+            /* Força quadrado perfeito */
             background: white;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             text-align: center;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
             color: var(--text-primary);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
+
         .dia:hover:not(.vazio) {
-            background: #f8fafc;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            background: #f0f7ff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             border-color: var(--btn-start);
         }
+
         .dia.vazio {
             background: transparent;
             border: none;
             cursor: default;
             box-shadow: none;
         }
+
         .dia.hoje {
             border: 2px solid var(--btn-start);
             font-weight: 800;
+            color: var(--btn-start);
         }
+
         .dia.selecionado {
-            background: var(--btn-start);
+            background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
             color: white;
-            box-shadow: 0 0 15px rgba(0, 150, 209, 0.3);
+            border-color: transparent;
+            box-shadow: 0 6px 18px rgba(0, 150, 209, 0.35);
+            font-weight: 800;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>Histórico de Acesso ao Banheiro</h1>
-            <nav>
-                <a href="index.html">Início</a>
-                <a href="dashboard.html">Estatísticas</a>
-                <a href="calendario.html">Histórico</a>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>Histórico de Acesso ao Banheiro</h1>
+                <div>
+                    <a href="admin.html" class="nav-action">Trocar Turma</a>
+                    <a href="#" onclick="fazerLogout()" class="nav-action nav-action-danger">Sair</a>
+                </div>
+            </div>
+            <nav id="mainNav">
+                <a href="index.html" class="nav-link" data-target="index.html">Início</a>
+                <a href="dashboard.html" class="nav-link" data-target="dashboard.html">Estatísticas</a>
+                <a href="calendario.html" class="nav-link" data-target="calendario.html">Histórico</a>
             </nav>
         </header>
 
         <main style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="card" style="align-self: start;">
                 <div class="calendario-header">
-                    <button id="btnAnterior">&lt; Anterior</button>
+                    <button id="btnAnterior" class="btn-calendario">&lt; Anterior</button>
                     <h2 id="mesAnoAtual" style="margin:0; border:none; padding:0;">Mês Ano</h2>
-                    <button id="btnProximo">Próximo &gt;</button>
+                    <button id="btnProximo" class="btn-calendario">Próximo &gt;</button>
                 </div>
-                
+
                 <div class="calendario-grid" id="calendarioGrid">
                     <!-- Gerado via JavaScript -->
                 </div>
             </div>
 
             <div class="card" style="align-self: start;">
-                <h2>Registros de: <span id="dataSelecionadaLabel" style="color:var(--status-andamento);">Selecione um dia</span></h2>
+                <h2>Registros de: <span id="dataSelecionadaLabel" style="color:var(--status-andamento);">Selecione um
+                        dia</span></h2>
                 <div id="resultadoArea" style="margin-top:20px;">
                     <p>Clique em um dia no calendário para visualizar os registros.</p>
                 </div>
@@ -102,5 +131,26 @@
     </div>
     <script src="js/ui.js"></script>
     <script src="js/calendario.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = window.location.search;
+            if (params) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    const target = link.getAttribute('data-target');
+                    link.href = `${target}${params}`;
+                });
+            }
+        });
+
+        async function fazerLogout() {
+            try {
+                await fetch('api/logout.php');
+                window.location.href = 'login.html';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
 </body>
+
 </html>

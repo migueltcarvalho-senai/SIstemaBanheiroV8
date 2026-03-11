@@ -1,0 +1,4 @@
+# Proteção da pasta config - impede acesso direto via navegador
+# Nega acesso a todos os arquivos desta pasta
+Order Deny,Allow
+Deny from all
